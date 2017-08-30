@@ -1,5 +1,4 @@
-一、认识Hystrix  
-
+一、认识Hystrix
 
 Hystrix是Netflix开源的一款容错框架，包含常用的容错方法：线程池隔离、信号量隔离、熔断、降级回退。在高并发访问下，系统所依赖的服务的稳定性对系统的影响非常大，依赖有很多不可控的因素，比如网络连接变慢，资源突然繁忙，暂时不可用，服务脱机等。我们要构建稳定、可靠的分布式系统，就必须要有这样一套容错方法。  
 本文将逐一分析线程池隔离、信号量隔离、熔断、降级回退这四种技术的原理与实践。
@@ -10,21 +9,13 @@ Hystrix是Netflix开源的一款容错框架，包含常用的容错方法：线
 
 比如我们现在有3个业务调用分别是查询订单、查询商品、查询用户，且这三个业务请求都是依赖第三方服务-订单服务、商品服务、用户服务。三个服务均是通过RPC调用。当查询订单服务，假如线程阻塞了，这个时候后续有大量的查询订单请求过来，那么容器中的线程数量则会持续增加直致CPU资源耗尽到100%，整个服务对外不可用，集群环境下就是雪崩。如下图
 
-  
-
-
 ![](http://mmbiz.qpic.cn/mmbiz_png/3xsFRgx4kHol84FkG4pPTnP58fUjXNc6MJ8lkzibgTtzML5hDoc1nyVice1DF25CFIHXMcRuUZ0KGL98VAK47mag/0.png?tp=webp&wxfrom=5&wx_lazy=1)
 
 订单服务不可用.png
 
-：
-
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixall1.png)
 
 整个tomcat容器不可用.png
-
-  
-
 
 2.2、线程隔离-线程池
 
@@ -48,10 +39,7 @@ hystrix线程执行过程和异步化.png
 
 创建线程池中的线程.png
 
-  
-
-
-执行Command的方式一共四种，直接看官方文档\(https://github.com/Netflix/Hystrix/wiki/How-it-Works\)，具体区别如下：
+执行Command的方式一共四种，直接看官方文档\([https://github.com/Netflix/Hystrix/wiki/How-it-Works\)，具体区别如下：](https://github.com/Netflix/Hystrix/wiki/How-it-Works%29，具体区别如下：)
 
 •execute\(\)：以同步堵塞方式执行run\(\)。调用execute\(\)后，hystrix先创建一个新线程运行run\(\)，接着调用程序要在execute\(\)调用处一直堵塞着，直到run\(\)运行完成。
 
@@ -69,9 +57,6 @@ execute\(\)和queue\(\)是HystrixCommand中的方法，observe\(\)和toObservabl
 
 线程池实际代码使用.png
 
-  
-
-
 2.2.3、线程隔离-线程池小结
 
 执行依赖代码的线程与请求线程\(比如Tomcat线程\)分离，请求线程可以自由控制离开的时间，这也是我们通常说的异步编程，Hystrix是结合RxJava来实现的异步编程。通过设置线程池大小来控制并发访问量，当线程饱和的时候可以拒绝服务，防止依赖问题扩散。
@@ -79,9 +64,6 @@ execute\(\)和queue\(\)是HystrixCommand中的方法，observe\(\)和toObservabl
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 线程隔离.png
-
-  
-
 
 线程池隔离的优点:  
 \[1\]:应用程序会被完全保护起来，即使依赖的一个服务的线程池满了，也不会影响到应用程序的其他部分。  
@@ -111,9 +93,6 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 
 信号量和线程池的区别.png
 
-  
-
-
 2.3.2、如何使用信号量来隔离线程
 
 将属性execution.isolation.strategy设置为SEMAPHORE ，象这样 ExecutionIsolationStrategy.SEMAPHORE，则Hystrix使用信号量而不是默认的线程池来做隔离。
@@ -121,9 +100,6 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 信号量使用.png
-
-  
-
 
 2.3.4、线程隔离-信号量小结
 
@@ -139,9 +115,6 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 
 熔断器开关图.png
 
-  
-
-
 说明，上面说的commandKey，就是在初始化的时候设置的andCommandKey\(HystrixCommandKey.Factory.asKey\("testCommandKey"\)\)
 
 再来看下熔断器在整个Hystrix流程图中的位置，从步骤4开始，如下图：
@@ -149,9 +122,6 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 Hystrix流程图.png
-
-  
-
 
 Hystrix会检查Circuit Breaker的状态。如果Circuit Breaker的状态为开启状态，Hystrix将不会执行对应指令，而是直接进入失败处理状态（图中8 Fallback）。如果Circuit Breaker的状态为关闭状态，Hystrix会继续进行线程池、任务队列、信号量的检查（图中5）
 
@@ -167,14 +137,11 @@ Hystrix会检查Circuit Breaker的状态。如果Circuit Breaker的状态为开�
 4、circuitBreaker.errorThresholdPercentage  
 设定错误百分比，默认值50%，例如一段时间（10s）内有100个请求，其中有55个超时或者异常返回了，那么这段时间内的错误百分比是55%，大于了默认值50%，这种情况下触发熔断器-打开。  
 5、circuitBreaker.requestVolumeThreshold  
-默认值20.意思是至少有20个请求才进行errorThresholdPercentage错误百分比计算。比如一段时间（10s）内有19个请求全部失败了。错误百分比是100%，但熔断器不会打开，因为requestVolumeThreshold的值是20. 这个参数非常重要，熔断器是否打开首先要满足这个条件，源代码如下
+默认值20.意思是至少有20个请求才进行errorThresholdPercentage错误百分比计算。比如一段时间（10s）内有19个请求全部失败了。错误百分比是100%，但熔断器不会打开，因为requestVolumeThreshold的值是20. 这个参数非常重要，熔断器是否打开首先要满足这个条件，源代码如下
 
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 熔断器打开先后条件判断.png
-
-  
-
 
 6、circuitBreaker.sleepWindowInMilliseconds  
 半开试探休眠时间，默认值5000ms。当熔断器开启一段时间之后比如5000ms，会尝试放过去一部分流量进行试探，确定依赖服务是否恢复。
@@ -185,15 +152,9 @@ Hystrix会检查Circuit Breaker的状态。如果Circuit Breaker的状态为开�
 
 熔断器实际使用代码1.png
 
-  
-
-
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 熔断器实际使用代码2.png
-
-  
-
 
 测试结果：
 
@@ -225,17 +186,11 @@ call times:23 result:fallback: isCircuitBreakerOpen: false
 call times:24 result:running: isCircuitBreakerOpen: false  
 call times:25 result:running: isCircuitBreakerOpen: false
 
-  
-
-
 3.3、熔断器\(Circuit Breaker\)源代码HystrixCircuitBreaker.java分析
 
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 HystrixCircuitBreaker.java.png
-
-  
-
 
 Factory 是一个工厂类，提供HystrixCircuitBreaker实例
 
@@ -243,32 +198,19 @@ Factory 是一个工厂类，提供HystrixCircuitBreaker实例
 
 Factory源码解析.png
 
-  
-
-
 HystrixCircuitBreakerImpl是HystrixCircuitBreaker的实现，allowRequest\(\)、isOpen\(\)、markSuccess\(\)都会在HystrixCircuitBreakerImpl有默认的实现。
 
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 HystrixCircuitBreakerImpl-1.png
 
-  
-
-
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
-HystrixCircuitBreakerImpl-allowSingleTest\(\).png  
-
-
-  
-
+HystrixCircuitBreakerImpl-allowSingleTest\(\).png
 
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 HystrixCircuitBreakerImpl-isOpen\(\).png
-
-  
-
 
 3.4、熔断器小结
 
@@ -292,37 +234,41 @@ Hystrix一共有如下几种降级回退模式：
 
 @Override
 
-   protected String run\(\) {
+protected String run\(\) {
 
-       if \(throwException\) {
+```
+   if \(throwException\) {
 
-           throw new RuntimeException\("failure from CommandThatFailsFast"\);
+       throw new RuntimeException\("failure from CommandThatFailsFast"\);
 
-       } else {
+   } else {
 
-           return "success";
+       return "success";
 
-       }
+   }
+```
 
-   }
+}
 
 如果我们实现的是HystrixObservableCommand.java则 重写 resumeWithFallback方法
 
 @Override
 
-   protected Observable&lt;String&gt; resumeWithFallback\(\) {
+protected Observable&lt;String&gt; resumeWithFallback\(\) {
 
-       if \(throwException\) {
+```
+   if \(throwException\) {
 
-           return Observable.error\(new Throwable\("failure from CommandThatFailsFast"\)\);
+       return Observable.error\(new Throwable\("failure from CommandThatFailsFast"\)\);
 
-       } else {
+   } else {
 
-           return Observable.just\("success"\);
+       return Observable.just\("success"\);
 
-       }
+   }
+```
 
-   }
+}
 
 4.2.2、Fail Silent 无声失败
 
@@ -334,27 +280,33 @@ fail silent.png
 
 @Override
 
-   protected String getFallback\(\) {
+protected String getFallback\(\) {
 
-       return null;
+```
+   return null;
+```
 
-   }
-
-@Override
-
-   protected List&lt;String&gt; getFallback\(\) {
-
-       return Collections.emptyList\(\);
-
-   }
+}
 
 @Override
 
-   protected Observable&lt;String&gt; resumeWithFallback\(\) {
+protected List&lt;String&gt; getFallback\(\) {
 
-       return Observable.empty\(\);
+```
+   return Collections.emptyList\(\);
+```
 
-   }
+}
+
+@Override
+
+protected Observable&lt;String&gt; resumeWithFallback\(\) {
+
+```
+   return Observable.empty\(\);
+```
+
+}
 
 4.2.3、Fallback: Static 返回默认值
 
@@ -362,19 +314,23 @@ fail silent.png
 
 @Override
 
-   protected Boolean getFallback\(\) {
+protected Boolean getFallback\(\) {
 
-       return true;
+```
+   return true;
+```
 
-   }
+}
 
 @Override
 
-   protected Observable&lt;Boolean&gt; resumeWithFallback\(\) {
+protected Observable&lt;Boolean&gt; resumeWithFallback\(\) {
 
-       return Observable.just\( true \);
+```
+   return Observable.just\( true \);
+```
 
-   }
+}
 
 4.2.4、Fallback: Stubbed 自己组装一个值返回
 
@@ -392,15 +348,9 @@ CommandWithStubbedFallback.png
 
 Cache via Network.png
 
-  
-
-
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 Cache via Network.png
-
-  
-
 
 4.2.6、Primary + Secondary with Fallback 主次方式回退（主要和次要）
 
@@ -410,29 +360,17 @@ Cache via Network.png
 
 Primary + Secondary with Fallback.png
 
-  
-
-
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 CommandFacadeWithPrimarySecondary-1.png
-
-  
-
 
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 CommandFacadeWithPrimarySecondary-2.png
 
-  
-
-
 ![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
 CommandFacadeWithPrimarySecondary-3.png
-
-  
-
 
 4.3、回退降级小结
 
