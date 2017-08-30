@@ -6,4 +6,6 @@
   * [Spring view resolver](spring/spring-view-resolver.md)
 * [Spring Boot](spring-boot.md)
 * Dubbox
+* [Spring Cloud](spring-cloud.md)
+  * [Hystrix](hystrix.md)
 
