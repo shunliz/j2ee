@@ -23,9 +23,9 @@ Hystrix是Netflix开源的一款容错框架，包含常用的容错方法：线
 
 Hystrix通过命令模式，将每个类型的业务请求封装成对应的命令请求，比如查询订单-&gt;订单Command，查询商品-&gt;商品Command，查询用户-&gt;用户Command。每个类型的Command对应一个线程池。创建好的线程池是被放入到ConcurrentHashMap中，比如查询订单：
 
-final static ConcurrentHashMap&lt;String, HystrixThreadPool&gt; threadPools = new ConcurrentHashMap&lt;String, HystrixThreadPool&gt;\(\);
+`final static ConcurrentHashMap<String, HystrixThreadPool> threadPools = new ConcurrentHashMap<String, HystrixThreadPool>();`
 
-threadPools.put\(“hystrix-order”, new HystrixThreadPoolDefault\(threadPoolKey, propertiesBuilder\)\);
+`threadPools.put(“hystrix-order”, new HystrixThreadPoolDefault(threadPoolKey, propertiesBuilder));`
 
 当第二次查询订单请求过来的时候，则可以直接从Map中获取该线程池。具体流程如下图：
 
@@ -53,7 +53,7 @@ execute\(\)和queue\(\)是HystrixCommand中的方法，observe\(\)和toObservabl
 
 2.2.2、如何应用到实际代码中
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixcode1.png)
 
 线程池实际代码使用.png
 
@@ -61,7 +61,7 @@ execute\(\)和queue\(\)是HystrixCommand中的方法，observe\(\)和toObservabl
 
 执行依赖代码的线程与请求线程\(比如Tomcat线程\)分离，请求线程可以自由控制离开的时间，这也是我们通常说的异步编程，Hystrix是结合RxJava来实现的异步编程。通过设置线程池大小来控制并发访问量，当线程饱和的时候可以拒绝服务，防止依赖问题扩散。
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixthread1.png)
 
 线程隔离.png
 
@@ -89,7 +89,7 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 
 上面谈到了线程池的缺点，当我们依赖的服务是极低延迟的，比如访问内存缓存，就没有必要使用线程池的方式，那样的话开销得不偿失，而是推荐使用信号量这种方式。下面这张图说明了线程池隔离和信号量隔离的主要区别：线程池方式下业务请求线程和执行依赖的服务的线程不是同一个线程；信号量方式下业务请求线程和执行依赖服务的线程是同一个线程
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixthread2.png)
 
 信号量和线程池的区别.png
 
@@ -97,7 +97,7 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 
 将属性execution.isolation.strategy设置为SEMAPHORE ，象这样 ExecutionIsolationStrategy.SEMAPHORE，则Hystrix使用信号量而不是默认的线程池来做隔离。
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixuse1.png)
 
 信号量使用.png
 
@@ -111,7 +111,7 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 
 熔断器，现实生活中有一个很好的类比，就是家庭电路中都会安装一个保险盒，当电流过大的时候保险盒里面的保险丝会自动断掉，来保护家里的各种电器及电路。Hystrix中的熔断器\(Circuit Breaker\)也是起到这样的作用，Hystrix在运行过程中会向每个commandKey对应的熔断器报告成功、失败、超时和拒绝的状态，熔断器维护计算统计的数据，根据这些统计的信息来确定熔断器是否打开。如果打开，后续的请求都会被截断。然后会隔一段时间默认是5s，尝试半开，放入一部分流量请求进来，相当于对依赖服务进行一次健康检查，如果恢复，熔断器关闭，随后完全恢复调用。如下图：
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixfuse1.png)
 
 熔断器开关图.png
 
@@ -119,7 +119,7 @@ Netflix API每天使用线程隔离处理10亿次Hystrix Command执行。 每个
 
 再来看下熔断器在整个Hystrix流程图中的位置，从步骤4开始，如下图：
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixprocess1.png)
 
 Hystrix流程图.png
 
@@ -139,7 +139,7 @@ Hystrix会检查Circuit Breaker的状态。如果Circuit Breaker的状态为开�
 5、circuitBreaker.requestVolumeThreshold  
 默认值20.意思是至少有20个请求才进行errorThresholdPercentage错误百分比计算。比如一段时间（10s）内有19个请求全部失败了。错误百分比是100%，但熔断器不会打开，因为requestVolumeThreshold的值是20. 这个参数非常重要，熔断器是否打开首先要满足这个条件，源代码如下
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixcode2.png)
 
 熔断器打开先后条件判断.png
 
@@ -148,11 +148,11 @@ Hystrix会检查Circuit Breaker的状态。如果Circuit Breaker的状态为开�
 
 测试代码（模拟10次调用，错误百分比为5%的情况下，打开熔断器开关。）：
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixusecode1.png)
 
 熔断器实际使用代码1.png
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixcodeuse2.png)
 
 熔断器实际使用代码2.png
 
@@ -188,27 +188,27 @@ call times:25 result:running: isCircuitBreakerOpen: false
 
 3.3、熔断器\(Circuit Breaker\)源代码HystrixCircuitBreaker.java分析
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixjavacode1.png)
 
 HystrixCircuitBreaker.java.png
 
 Factory 是一个工厂类，提供HystrixCircuitBreaker实例
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/hystrixcodeusejava2.png)
 
 Factory源码解析.png
 
 HystrixCircuitBreakerImpl是HystrixCircuitBreaker的实现，allowRequest\(\)、isOpen\(\)、markSuccess\(\)都会在HystrixCircuitBreakerImpl有默认的实现。
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/codeuserjava3.png)
 
 HystrixCircuitBreakerImpl-1.png
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/codeusejava4.png)
 
 HystrixCircuitBreakerImpl-allowSingleTest\(\).png
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/codeusejava6.png)
 
 HystrixCircuitBreakerImpl-isOpen\(\).png
 
@@ -274,7 +274,7 @@ protected Observable&lt;String&gt; resumeWithFallback\(\) {
 
 返回null，空Map，空List
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/failsilent.png)
 
 fail silent.png
 
@@ -336,7 +336,7 @@ protected Observable&lt;Boolean&gt; resumeWithFallback\(\) {
 
 当我们执行返回的结果是一个包含多个字段的对象时，则会以Stubbed 的方式回退。Stubbed 值我们建议在实例化Command的时候就设置好一个值。以countryCodeFromGeoLookup为例，countryCodeFromGeoLookup的值，是在我们调用的时候就注册进来初始化好的。CommandWithStubbedFallback command = new CommandWithStubbedFallback\(1234, "china"\);主要代码如下：
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/commandstubfallback.png)
 
 CommandWithStubbedFallback.png
 
@@ -344,11 +344,11 @@ CommandWithStubbedFallback.png
 
 通过远程缓存的方式。在失败的情况下再发起一次remote请求，不过这次请求的是一个缓存比如redis。由于是又发起一起远程调用，所以会重新封装一次Command，这个时候要注意，执行fallback的线程一定要跟主线程区分开，也就是重新命名一个ThreadPoolKey。
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/cachevnetwork.png)
 
 Cache via Network.png
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/cachvnetwork2.png)
 
 Cache via Network.png
 
@@ -356,7 +356,7 @@ Cache via Network.png
 
 这个有点类似我们日常开发中需要上线一个新功能，但为了防止新功能上线失败可以回退到老的代码，我们会做一个开关比如使用zookeeper做一个配置开关，可以动态切换到老代码功能。那么Hystrix它是使用通过一个配置来在两个command中进行切换。
 
-![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+![](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)![](/assets/primararysecond.png)
 
 Primary + Secondary with Fallback.png
 
