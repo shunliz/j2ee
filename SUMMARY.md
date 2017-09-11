@@ -8,4 +8,5 @@
 * Dubbox
 * [Spring Cloud](spring-cloud.md)
   * [Hystrix](hystrix.md)
+  * [架构](jia-gou.md)
 
