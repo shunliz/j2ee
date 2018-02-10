@@ -105,7 +105,7 @@ public interface TransactionDefinition {
     int getIsolationLevel(); // 返回事务的隔离级别，事务管理器根据它来控制另外一个事务可以看到本事务内的哪些数据
     int getTimeout();  // 返回事务必须在多少秒内完成
     boolean isReadOnly(); // 事务是否只读，事务管理器能够根据这个返回值进行优化，确保事务是只读的
-} 
+}
 ```
 
 我们可以发现TransactionDefinition正好用来定义事务属性，下面详细介绍一下各个事务属性。
@@ -124,7 +124,6 @@ public interface TransactionDefinition {
 | PROPAGATION\_NEVER | 表示当前方法不应该运行在事务上下文中。如果当前正有一个事务在运行，则会抛出异常 |
 | PROPAGATION\_NESTED | 表示如果当前已经存在一个事务，那么该方法将会在嵌套事务中运行。嵌套的事务可以独立于当前事务进行单独地提交或回滚。如果当前事务不存在，那么其行为与PROPAGATION\_REQUIRED一样。注意各厂商对这种传播行为的支持是有所差异的。可以参考资源管理器的文档来确认它们是否支持嵌套事务 |
 
-  
 _注：以下具体讲解传播行为的内容参考自_[_Spring事务机制详解_](http://www.open-open.com/lib/view/open1350865116821.html)  
 （1）PROPAGATION\_REQUIRED 如果存在一个事务，则支持当前事务。如果没有事务则开启一个新的事务。
 
@@ -133,7 +132,6 @@ _注：以下具体讲解传播行为的内容参考自_[_Spring事务机制详�
 ```
 
 ```
-
 methodA
 {
 ……
@@ -150,8 +148,6 @@ methodB
 {
 ……
 }
-
-
 ```
 
 使用spring声明式事务，spring使用AOP来支持声明式事务，会根据事务属性，自动在方法调用之前决定是否开启一个事务，并在方法执行之后决定事务提交或回滚事务。
@@ -161,7 +157,7 @@ methodB
 ```
 main
 {
- 
+
     metodB();
 }
 ```
@@ -187,7 +183,7 @@ Main{
         //释放资源
         closeCon(); 
     } 
-} 
+}
 ```
 
 Spring保证在methodB方法中所有的调用都获得到一个相同的连接。在调用methodB时，没有一个存在的事务，所以获得一个新的连接，开启了一个新的事务。  
@@ -207,12 +203,10 @@ main{
     } finally {    
         closeCon(); 
     }  
-} 
+}
 ```
 
 调用MethodA时，环境中没有事务，所以开启一个新的事务.当在MethodA中调用MethodB时，环境中已经有了一个事务，所以methodB就加入当前事务。
-
-
 
 （2）PROPAGATION\_SUPPORTS 如果存在一个事务，支持当前事务。如果没有事务，则非事务的执行。但是对于事务同步的事务管理器，PROPAGATION\_SUPPORTS与不使用事务有少许不同。
 
@@ -371,8 +365,6 @@ PROPAGATION\_REQUIRES\_NEW 启动一个新的, 不依赖于环境的 “内部�
 
 PROPAGATION\_REQUIRED应该是我们首先的事务传播行为。它能够满足我们大多数的事务需求。
 
-
-
 ### 2.2.2 隔离级别 {#222-隔离级别}
 
 事务的第二个维度就是隔离级别（isolation level）。隔离级别定义了一个事务可能受其他并发事务影响的程度。  
@@ -391,7 +383,7 @@ PROPAGATION\_REQUIRED应该是我们首先的事务传播行为。它能够满�
 
 ```
     con1 = getConnection();  
-    select salary from employee empId ="Mary";  
+    select salary from employee empId ="Mary";
 ```
 
 在事务2中，这时财务人员修改了Mary的工资为2000,并提交了事务.
@@ -399,14 +391,14 @@ PROPAGATION\_REQUIRED应该是我们首先的事务传播行为。它能够满�
 ```
     con2 = getConnection();  
     update employee set salary = 2000;  
-    con2.commit();  
+    con2.commit();
 ```
 
 在事务1中，Mary 再次读取自己的工资时，工资变为了2000
 
 ```
     //con1  
-    select salary from employee empId ="Mary"; 
+    select salary from employee empId ="Mary";
 ```
 
 在一个事务中前后两次读取的结果并不一致，导致了不可重复读。
@@ -417,7 +409,7 @@ PROPAGATION\_REQUIRED应该是我们首先的事务传播行为。它能够满�
 
 ```
     con1 = getConnection();  
-    Select * from employee where salary =1000; 
+    Select * from employee where salary =1000;
 ```
 
 共读取10条记录
@@ -427,14 +419,14 @@ PROPAGATION\_REQUIRED应该是我们首先的事务传播行为。它能够满�
 ```
     con2 = getConnection();  
     Insert into employee(empId,salary) values("Lili",1000);  
-    con2.commit();  
+    con2.commit();
 ```
 
 事务1再次读取所有工资为1000的员工
 
 ```
     //con1  
-    select * from employee where salary =1000;  
+    select * from employee where salary =1000;
 ```
 
 共读取到了11条记录，这就产生了幻像读。
@@ -442,8 +434,6 @@ PROPAGATION\_REQUIRED应该是我们首先的事务传播行为。它能够满�
 从总的结果来看, 似乎不可重复读和幻读都表现为两次读取的结果不一致。但如果你从控制的角度来看, 两者的区别就比较大。  
 对于前者, 只需要锁住满足条件的记录。  
 对于后者, 要锁住满足条件及其相近的记录。
-
-
 
 （2）隔离级别
 
@@ -479,7 +469,7 @@ public interface TransactionStatus{
     void setRollbackOnly();  // 设置为只回滚
     boolean isRollbackOnly(); // 是否为只回滚
     boolean isCompleted; // 是否已完成
-} 
+}
 ```
 
 可以发现这个接口描述的是一些处理事务提供简单的控制事务执行和查询事务状态的方法，在回滚或提交的时候需要应用对应的事务状态。
