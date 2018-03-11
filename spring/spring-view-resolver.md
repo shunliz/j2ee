@@ -4,6 +4,8 @@
 
 答案就在`DispatcherServlet`的`resolveViewName`方法中，它循环一个`viewResolvers`列表， 然后调用`ViewResolver.resolveViewName(...)`方法，当列表中任意一个`viewResolver`返回不为`null`时，`DispatcherServlet`就认为这个`view`解析完毕，并使用解析得到的`View`对象继续处理。
 
+
+
 那么问题就来了，这个`viewResolvers`列表是如何来的呢？
 
 答案在`DispatcherServlet`的`initViewResolver`方法中。在该方法中，首先根据`detectAllViewResolvers`标识来确定`viewResolver`的获取方式：
