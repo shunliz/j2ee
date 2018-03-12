@@ -3,10 +3,8 @@
 Spring MVC框架中的Interceptor，与Servlet API中的Filter十分类似，用于对Web请求进行预处理/后处理。通常情况下这些预处理/后处理逻辑是通用的，可以被应用于所有或多个Web请求，例如：
 
 * 记录Web请求相关日志，可以用于做一些信息监控、统计、分析
-* 检查Web请求访问权限，例如发现用户没有登录后，重定向到登录页面
+* * 检查Web请求访问权限，例如发现用户没有登录后，重定向到登录页面
 * 打开/关闭数据库连接——预处理时打开，后处理关闭，可以避免在所有业务方法中都编写类似代码，也不会忘记关闭数据库连接
-
-
 
 # Spring MVC请求处理流程![](/assets/springmvc1.png)
 
@@ -32,7 +30,6 @@ public interface HandlerInterceptor {
                          HttpServletResponse response, 
                          Object handler, Exception ex) throws Exception;
 }
-
 ```
 
 * `preHandle()`
@@ -60,7 +57,6 @@ public class Interceptor extends HandlerInterceptorAdapter {
         return true;
     }
 }
-
 ```
 
 ### 配置Interceptor {#14}
@@ -80,7 +76,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
     }
 }
-
 ```
 
 ## @ModelAttribute {#15}
@@ -112,7 +107,6 @@ public void populateModel(@RequestParam String number, Model model) {
     model.addAttribute(accountManager.findAccount(number));
     // add more ...
 }
-
 ```
 
 `@ModelAttribute`方法通常被用来填充一些公共需要的属性或数据，比如一个下拉列表所预设的几种状态，或者宠物的几种类型，或者去取得一个HTML表单渲染所需要的命令对象，比如`Account`等。
@@ -145,7 +139,6 @@ public void populateModel(@RequestParam String number, Model model) {
 ```
 @RequestMapping(path = "/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
 public String processSubmit(@ModelAttribute Pet pet) { }
-
 ```
 
 以上面的代码为例，这个Pet类型的实例可能来自哪里呢？有几种可能:
@@ -166,7 +159,6 @@ public String processSubmit(@ModelAttribute Pet pet) { }
 public String save(@ModelAttribute("account") Account account) {
 
 }
-
 ```
 
 这个例子中，model属性的名称（"account"）与URI模板变量的名称相匹配。如果配置了一个可以将`String`类型的账户值转换成`Account`类型实例的转换器`Converter<String, Account>`，那么上面这段代码就可以工作的很好，而不需要再额外写一个`@ModelAttribute`方法。
@@ -185,7 +177,6 @@ public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result
     // ...
 
 }
-
 ```
 
 拿到`BindingResult`参数后，可以检查是否有错误，可以通过Spring的`<errors>`表单标签来在同一个表单上显示错误信息。
@@ -204,7 +195,6 @@ public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result
     // ...
 
 }
-
 ```
 
 又或者可以通过添加一个JSR-303规范的`@Valid`标注，这样验证器会自动被调用。
@@ -220,7 +210,6 @@ public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult
     // ...
 
 }
-
 ```
 
 ## 异常处理 {#18}
@@ -250,7 +239,6 @@ Spring MVC框架提供了多种机制用来处理异常，初次接触可能会�
 @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "No Such Post")//404 Not Found
 public class PostNotFoundException extends RuntimeException {
 }
-
 ```
 
 在`Controller`中可以这样使用它：
@@ -263,7 +251,6 @@ public String showPost(@PathVariable("id") long id, Model model) {
     model.addAttribute("post", post);
     return "postDetail";
 }
-
 ```
 
 这样如果我们访问了一个不存在的文章，那么Spring MVC会根据抛出的`PostNotFoundException`上的注解值返回一个HTTP 404 Not Found给浏览器。
@@ -293,7 +280,6 @@ public String showPost(@PathVariable("id") long id, Model model) {
     Post
     >
     `——如果不存在则Optional为空，抛出异常。
-
 
 这样在所有的`Controller`方法中，只需要正常获取文章即可，所有的异常处理都交给了Spring MVC。
 
@@ -340,7 +326,6 @@ public class ExceptionHandlingController {
     return mav;
   }
 }
-
 ```
 
 首先需要明确的一点是，在`Controller`方法中的`@ExceptionHandler`方法只能够处理同一个`Controller`中抛出的异常。这些方法上同时也可以继续使用`@ResponseStatus`注解用于返回指定的HTTP状态码，但同时还能够支持更加丰富的异常处理：
@@ -375,7 +360,6 @@ class GlobalControllerExceptionHandler {
         // Nothing to do
     }
 }
-
 ```
 
 Spring MVC默认对于没有捕获也没有被`@ResponseStatus`以及`@ExceptionHandler`声明的异常，会直接返回500，这显然并不友好，可以在`@ControllerAdvice`中对其进行处理（例如返回一个友好的错误页面，引导用户返回正确的位置或者提交错误信息）：
@@ -402,7 +386,6 @@ class GlobalDefaultExceptionHandler {
         return mav;
     }
 }
-
 ```
 
 ### 总结 {#23}
