@@ -1,8 +1,6 @@
 ###### 从零开始学CAS单点登录——实例Demo
 
-2017年04月05日 16:40:35
 
-阅读数：6443
 
 首先说明的是，本文提供的是一个快速上手的实例，并不打算详细阐述单点登录的概念和CAS的工作原理。这也是本人平时学习的习惯：不管什么技术，先把环境搭起来，从最简单的Hello World逐步到其背后的Why-What-How。
 
@@ -22,22 +20,9 @@
 **\System32\drivers\etc\hosts**
 
 ```
-127.0
-.0
-.1
-   cas-app1
-.com
-127.0
-.0
-.1
-   cas-app2
-.com
-127.0
-.0
-.1
-   cas-server
-.com
-
+127.0.0.1   cas-app1.com
+127.0.0.1   cas-app2.com
+127.0.0.1   cas-server.com
 ```
 
 ---
@@ -60,89 +45,37 @@
 只需修改cas server部署的Tomcat的访问路径即可：
 
 ```
-server
-.name=http:
-//cas-server:38080
-
+server.name=http://cas-server:38080
 ```
 
 2 WEB-INF/deployerConfigContext.xml  
 为了简单起见，我们不启用HTTPS，添加requireSecure为false：
 
 ```
-<
-bean 
-class
-=
-"org.jasig.cas.authentication.handler.support.HttpBasedServiceCredentialsAuthenticationHandler"
-
-                    p:httpClient-
-ref
-=
-"httpClient"
- p:requireSecure=
-"false"
- /
->
-
+<bean class="org.jasig.cas.authentication.handler.support.HttpBasedServiceCredentialsAuthenticationHandler"
+                    p:httpClient-ref="httpClient" p:requireSecure="false" />
 ```
 
 3 ticketGrantingTicketCookieGenerator.xml  
 同样添加cookieSecure为false：
 
 ```
-<
-bean 
-id
-=
-"ticketGrantingTicketCookieGenerator"
-class
-=
-"org.jasig.cas.web.support.CookieRetrievingCookieGenerator"
-
-        p:cookieSecure=
-"false"
-
-        p:cookieMaxAge=
-"-1"
-
-        p:cookieName=
-"CASTGC"
-
-        p:cookiePath=
-"/cas"
- /
->
-
+  <bean id="ticketGrantingTicketCookieGenerator" class="org.jasig.cas.web.support.CookieRetrievingCookieGenerator"
+        p:cookieSecure="false"
+        p:cookieMaxAge="-1"
+        p:cookieName="CASTGC"
+        p:cookiePath="/cas" />
 ```
 
 4 warnCookieGenerator.xml  
 同样添加cookieSecure为false：
 
 ```
-<
-bean 
-id
-=
-"warnCookieGenerator"
-class
-=
-"org.jasig.cas.web.support.CookieRetrievingCookieGenerator"
-
-        p:cookieSecure=
-"false"
-
-        p:cookieMaxAge=
-"-1"
-
-        p:cookieName=
-"CASPRIVACY"
-
-        p:cookiePath=
-"/cas"
- /
->
-
+  <bean id="warnCookieGenerator" class="org.jasig.cas.web.support.CookieRetrievingCookieGenerator"
+        p:cookieSecure="false"
+        p:cookieMaxAge="-1"
+        p:cookieName="CASPRIVACY"
+        p:cookiePath="/cas" />
 ```
 
 **4 启动Tomcat**  
@@ -166,423 +99,87 @@ class
 整合cas，肯定得用到cas的代码吧，所以在pom中引入cas客户端：
 
 ```
-<
-dependency
->
-<
-groupId
->
-org.jasig.cas.client
-<
-/
-groupId
->
-<
-artifactId
->
-cas-client-core
-<
-/
-artifactId
->
-<
-version
->
-3.2.1
-<
-/
-version
->
-<
-/
-dependency
->
-<
-dependency
->
-<
-groupId
->
-log4j
-<
-/
-groupId
->
-<
-artifactId
->
-log4j
-<
-/
-artifactId
->
-<
-version
->
-1.2.16
-<
-/
-version
->
-<
-/
-dependency
->
-
+<dependency>
+    <groupId>org.jasig.cas.client</groupId>
+    <artifactId>cas-client-core</artifactId>
+    <version>3.2.1</version>
+</dependency>
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.16</version>
+</dependency>
 ```
 
 2 web.xml  
 要登录拦截，肯定得靠过滤器，所以在web.xml中配置一系列的Filter。具体哪些Filter可以暂时不关心，只需配置几个URL即可，serverName就是我们当前的接入系统，casServer就是CAS Server认证中心：
 
 ```
-<
-!-- ======================== start ======================== --
->
-<
-listener
->
-<
-listener-class
->
-org.jasig.cas.client.session.SingleSignOutHttpSessionListener
-<
-/
-listener-class
->
-<
-/
-listener
->
-<
-filter
->
-<
-filter-name
->
-CAS Single Sign Out Filter
-<
-/
-filter-name
->
-<
-filter-class
->
-org.jasig.cas.client.session.SingleSignOutFilter
-<
-/
-filter-class
->
-<
-/
-filter
->
-<
-filter-mapping
->
-<
-filter-name
->
-CAS Single Sign Out Filter
-<
-/
-filter-name
->
-<
-url-pattern
->
-/*
-<
-/
-url-pattern
->
-<
-/
-filter-mapping
->
-<
-filter
->
-<
-filter-name
->
-CAS Filter
-<
-/
-filter-name
->
-<
-filter-class
->
-org.jasig.cas.client.authentication.AuthenticationFilter
-<
-/
-filter-class
->
-<
-init-param
->
-<
-param-name
->
-casServerLoginUrl
-<
-/
-param-name
->
-<
-param-value
->
-http://cas-server.com:38080/cas/login
-<
-/
-param-value
->
-<
-/
-init-param
->
-<
-init-param
->
-<
-param-name
->
-serverName
-<
-/
-param-name
->
-<
-param-value
->
-http://cas-app1.com:18080/
-<
-/
-param-value
->
-<
-/
-init-param
->
-<
-/
-filter
->
-<
-filter-mapping
->
-<
-filter-name
->
-CAS Filter
-<
-/
-filter-name
->
-<
-url-pattern
->
-/*
-<
-/
-url-pattern
->
-<
-/
-filter-mapping
->
-<
-filter
->
-<
-filter-name
->
-CAS Validation Filter
-<
-/
-filter-name
->
-<
-filter-class
->
-
+<!-- ======================== start ======================== -->
+<listener>
+    <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
+</listener>
+<filter>
+    <filter-name>CAS Single Sign Out Filter</filter-name>
+    <filter-class>org.jasig.cas.client.session.SingleSignOutFilter</filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>CAS Single Sign Out Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+<filter>
+    <filter-name>CAS Filter</filter-name>
+    <filter-class>org.jasig.cas.client.authentication.AuthenticationFilter</filter-class>
+    <init-param>
+        <param-name>casServerLoginUrl</param-name>
+        <param-value>http://cas-server.com:38080/cas/login</param-value>
+    </init-param>
+    <init-param>
+        <param-name>serverName</param-name>
+        <param-value>http://cas-app1.com:18080/</param-value>
+    </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>CAS Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+<filter>
+    <filter-name>CAS Validation Filter</filter-name>
+    <filter-class>
         org.jasig.cas.client.validation.Cas20ProxyReceivingTicketValidationFilter
-    
-<
-/
-filter-class
->
-<
-init-param
->
-<
-param-name
->
-casServerUrlPrefix
-<
-/
-param-name
->
-<
-param-value
->
-http://cas-server.com:38080/cas/
-<
-/
-param-value
->
-<
-/
-init-param
->
-<
-init-param
->
-<
-param-name
->
-serverName
-<
-/
-param-name
->
-<
-param-value
->
-http://cas-app1.com:18080
-<
-/
-param-value
->
-<
-/
-init-param
->
-<
-/
-filter
->
-<
-filter-mapping
->
-<
-filter-name
->
-CAS Validation Filter
-<
-/
-filter-name
->
-<
-url-pattern
->
-/*
-<
-/
-url-pattern
->
-<
-/
-filter-mapping
->
-<
-filter
->
-<
-filter-name
->
-CAS HttpServletRequest Wrapper Filter
-<
-/
-filter-name
->
-<
-filter-class
->
-
+    </filter-class>
+    <init-param>
+        <param-name>casServerUrlPrefix</param-name>
+        <param-value>http://cas-server.com:38080/cas/</param-value>
+    </init-param>
+    <init-param>
+        <param-name>serverName</param-name>
+        <param-value>http://cas-app1.com:18080</param-value>
+    </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>CAS Validation Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+<filter>
+    <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+    <filter-class>
         org.jasig.cas.client.util.HttpServletRequestWrapperFilter
-    
-<
-/
-filter-class
->
-<
-/
-filter
->
-<
-filter-mapping
->
-<
-filter-name
->
-CAS HttpServletRequest Wrapper Filter
-<
-/
-filter-name
->
-<
-url-pattern
->
-/*
-<
-/
-url-pattern
->
-<
-/
-filter-mapping
->
-<
-filter
->
-<
-filter-name
->
-CAS Assertion Thread Local Filter
-<
-/
-filter-name
->
-<
-filter-class
->
-org.jasig.cas.client.util.AssertionThreadLocalFilter
-<
-/
-filter-class
->
-<
-/
-filter
->
-<
-filter-mapping
->
-<
-filter-name
->
-CAS Assertion Thread Local Filter
-<
-/
-filter-name
->
-<
-url-pattern
->
-/*
-<
-/
-url-pattern
->
-<
-/
-filter-mapping
->
-<
-!-- ======================== end ======================== --
->
-
+    </filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+<filter>
+    <filter-name>CAS Assertion Thread Local Filter</filter-name>
+    <filter-class>org.jasig.cas.client.util.AssertionThreadLocalFilter</filter-class>
+</filter>
+<filter-mapping>
+    <filter-name>CAS Assertion Thread Local Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+<!-- ======================== end ======================== -->
 ```
 
 **3 启动Tomcat**  
