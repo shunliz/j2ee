@@ -2,8 +2,6 @@
 
 Hystrix是Netflix开源的一款容错框架，包含常用的容错方法：线程池隔离、信号量隔离、熔断、降级回退。在高并发访问下，系统所依赖的服务的稳定性对系统的影响非常大，依赖有很多不可控的因素，比如网络连接变慢，资源突然繁忙，暂时不可用，服务脱机等。我们要构建稳定、可靠的分布式系统，就必须要有这样一套容错方法。
 
-
-
 本文将逐一分析线程池隔离、信号量隔离、熔断、降级回退这四种技术的原理与实践。
 
 二、线程隔离
@@ -35,6 +33,8 @@ Hystrix通过命令模式，将每个类型的业务请求封装成对应的命�
 ![](http://mmbiz.qpic.cn/mmbiz_png/3xsFRgx4kHol84FkG4pPTnP58fUjXNc6BaqQZSWh6dZ9PQo5T16u4Tc09BKUMMHFicgdLQMaPhJaibTE5QANp78g/0.png?tp=webp&wxfrom=5&wx_lazy=1)
 
 hystrix线程执行过程和异步化.png
+
+
 
 创建线程池中的线程的方法，查看源代码如下：
 
