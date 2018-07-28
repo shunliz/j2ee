@@ -116,8 +116,6 @@ hystrix熔断机制
 
 静态资源回滚
 
-
-
 # 压测与预案
 
 # 缓存
@@ -128,5 +126,9 @@ hystrix熔断机制
 
 
 
+ 缓存使用模式：
 
+Cache-Aside:存在并发更新的可能。
+
+Cache-As-SoR: read through 业务代码先调用cache不中在由cache回源SoR, write through, write behind
 
