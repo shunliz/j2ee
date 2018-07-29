@@ -130,19 +130,21 @@ Cache-Aside:存在并发更新的可能。
 
 Cache-As-SoR: read through 业务代码先调用cache不中在由cache回源SoR, write through, write behind
 
-
-
 # HTTP 缓存
 
 Last-modified
 
 ETag
 
-
-
-
-
 # 多级缓存
+
+nginx本地缓存用来解决热点缓存问题
+
+分布式缓存用来减少访问回源率
+
+tomcat堆缓存用来防止相关缓存失效、崩溃之后的冲击
+
+
 
 
 
