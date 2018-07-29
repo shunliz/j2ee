@@ -124,11 +124,25 @@ hystrix熔断机制
 
 回收算法：FIFO，LRU，LFU
 
-
-
- 缓存使用模式：
+缓存使用模式：
 
 Cache-Aside:存在并发更新的可能。
 
 Cache-As-SoR: read through 业务代码先调用cache不中在由cache回源SoR, write through, write behind
+
+
+
+# HTTP 缓存
+
+Last-modified
+
+ETag
+
+
+
+
+
+# 多级缓存
+
+
 
