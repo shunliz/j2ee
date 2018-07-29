@@ -172,17 +172,13 @@ CompletableFuture
 
 数据库拆分
 
-
-
-分库分表
+### 分库分表
 
 sharding-jdbc
 
 mycat
 
-
-
-数据异构
+### 数据异构
 
 查询异构
 
