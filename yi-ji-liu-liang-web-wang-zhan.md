@@ -162,9 +162,29 @@ Callback
 
 CompletableFuture
 
-
-
 # 扩容
 
+单体应用垂直扩容
 
+单体应用水平扩容
+
+应用拆分
+
+数据库拆分
+
+
+
+分库分表
+
+sharding-jdbc
+
+mycat
+
+
+
+数据异构
+
+查询异构
+
+聚合数据异构
 
