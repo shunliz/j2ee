@@ -1,4 +1,4 @@
-```
+```java
 public class NIOServer
 {
     public static void main(String[] args) throws IOException
