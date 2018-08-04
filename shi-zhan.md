@@ -286,9 +286,6 @@
 
 
 
-![](data:image/svg+xml;utf8,<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="682" height="635"></svg>)
-
-
 
 采用了上述方案后，所有的全库表查询问题都得到了解决，但不要止步于此，还可以进一步优化。
 
@@ -338,23 +335,4 @@
 
 此外，在产品系统中，product、brand、category数据量均不会超过1000W，因此无需分库分表。
 
-  
-
-
-作者：大闲人柴毛毛
-
-  
-
-
-链接：https://juejin.im/post/5aa4ded26fb9a028e46e43ca
-
-  
-
-
-来源：掘金
-
-  
-
-
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 
