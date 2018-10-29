@@ -9,6 +9,7 @@
   * [CSRF](spring/csrf.md)
   * [嵌套事务回滚](spring/qian-tao-shi-wu-hui-gun.md)
 * [Spring Boot](spring-boot.md)
+  * [Application Events and Listeners](spring-boot/application-events-and-listeners.md)
 * Dubbox
 * [Spring Cloud](spring-cloud.md)
   * [Hystrix](hystrix.md)
