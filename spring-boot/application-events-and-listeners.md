@@ -33,11 +33,7 @@ package com.simos.service;
 
 import org.springframework.stereotype.Service;
 
-/**
- * Created by l2h on 18-4-16.
- * Desc:系统初始化后执行一些业务操作
- * @author l2h
- */
+
 @Service
 public class SystemInitService {
 public void systemInit(){
@@ -59,11 +55,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
-/**
- * Created by l2h on 18-4-16.
- * Desc:事件监听处理
- * @author l2h
- */
+
 public class SimosApplicationListener implements ApplicationListener<ApplicationEvent>{
 @Override
 public void onApplicationEvent(ApplicationEvent event) {
@@ -108,11 +100,7 @@ public void onApplicationEvent(ApplicationEvent event) {
 第一种方式是手动注册，即在SpringApplication初始化的时候添加进去
 
 ```
-/**
- * Created by l2h on 18-4-9.
- * Desc: 应用入口　main
- * @author l2h
- */
+
 @SpringBootApplication
 public class QuickStartApplication {
 public static void  main(String[]args){
@@ -131,11 +119,7 @@ org.springframework.context.ApplicationListener=com.simos.listener.SimosApplicat
 通过自动注册的方式main入口就与无listener时一样：
 
 ```
-/**
- * Created by l2h on 18-4-9.
- * Desc: 应用入口　main
- * @author l2h
- */
+
 @SpringBootApplication
 public class QuickStartApplication {
 public static void  main(String[]args){
