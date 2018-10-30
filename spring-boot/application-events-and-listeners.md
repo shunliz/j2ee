@@ -101,7 +101,6 @@ public void onApplicationEvent(ApplicationEvent event) {
     }
 }
 }
-
 ```
 
 ##### 3.3监听器listener注册
@@ -121,14 +120,12 @@ public static void  main(String[]args){
             .listeners(new SimosApplicationListener()).run(args);
 }
 }
-
 ```
 
 第二种方式是，自动注册（springboot本身listener实现也是通过这种方式）．在resources目录下添加META-INF目录，然后在META-INF目录里添加spring.factories文件，文件内容是：
 
 ```
-org.springframework.context.ApplicationListener=\
-com.simos.listener.SimosApplicationListener
+org.springframework.context.ApplicationListener=com.simos.listener.SimosApplicationListener
 ```
 
 通过自动注册的方式main入口就与无listener时一样：
@@ -145,7 +142,6 @@ public static void  main(String[]args){
   SpringApplication.run(QuickStartApplication.class,args);
 }
 }
-
 ```
 
 启动后控制台打印如下：
