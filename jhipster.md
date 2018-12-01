@@ -28,8 +28,7 @@ A complete[Spring application](https://spring.io/):
 
 * [Spring Boot](https://projects.spring.io/spring-boot/) for easy application configuration
 * [Maven](https://maven.apache.org/) or [Gradle](http://www.gradle.org/) configuration for building, testing and running the application
-* [“development” and “production” profiles](https://www.jhipster.tech/profiles/)
-  \(both for Maven and Gradle\)
+* [“development” and “production” profiles](https://www.jhipster.tech/profiles/) \(both for Maven and Gradle\)
 * [Spring Security](https://docs.spring.io/spring-security/site/index.html)
 * [Spring MVC REST](https://spring.io/guides/gs/rest-service/) + [Jackson](https://github.com/FasterXML/jackson)
 * Optional WebSocket support with Spring Websocket
